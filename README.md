@@ -1,33 +1,43 @@
 # NFT Ticket Resell dApp
 
-Final project Encode Solidity Bootcamp Q4
+Event tickets as NFTs: organisers deploy their own event contract and earn a royalty on every resale.
 
-This project is a collaborative effort as part of the <a href="https://www.encode.club/solidity-bootcamps">Encode Solidity Bootcamp Q4</a>. Our group had approximately one week to develop this full-stack dApp.
+**[Live demo](https://resell-dapp-frontend.vercel.app/)** · runs on the Sepolia testnet, needs MetaMask and Sepolia ETH
 
-<a href="https://resell-dapp-frontend.vercel.app/">Check out our project!</a>
+**Stack:** Solidity (ERC-721) · Hardhat · Next.js · TypeScript · Scaffold-ETH 2 (wagmi, viem, RainbowKit) · Tailwind · NestJS · MongoDB Atlas
 
-We constructed a Solidity NFT contract based on the ERC-721 NON-FUNGIBLE TOKEN STANDARD. The frontend was implemented using Typescript, Scaffold-ETH dApp template, and Next.js. The REST API was developed with a Nest.js backend and a MongoDB database, hosted on Atlas. You can find both frontend and backend code in their respective folders within this GitHub repository.
+Built in one week by a team of six as the final project of the [Encode Solidity Bootcamp](https://www.encode.club/solidity-bootcamps) (Q4 2023). Original repository: [bangtam1994/Re-sell-dapp](https://github.com/bangtam1994/Re-sell-dapp)
 
-The project addresses the issue of event owners/creators not benefiting from resales on the secondary/resell market of their event tickets.
+## My role
 
-An event creator can create an event, deploying an Event.sol contract on-chain. The owner can specify the number of available tickets for the event, the price of each ticket, and the royalty percentage they want to receive for each ticket sold on the secondary market.
+- **Frontend foundation:** set up the Next.js app on the Scaffold-ETH template with routing for all pages, and built the landing page, header and wallet-connected states.
+- **Create-event flow:** built the page where organisers deploy their own `Event` contract from the browser with viem (price, ticket count, royalty slider), predict the contract address from the wallet nonce and register the event with the backend.
+- **Event listing:** event card component and the event overview on the landing page.
+- **Smart contract fixes:** fixed the ticket-quantity and resale-queue conditions in `Event.sol` and redeployed the contract to Sepolia.
+- **Deployment and docs:** prepared the NestJS API for deployment, wrote the final README and screenshots.
 
-A user can purchase a ticket, resulting in the minting of a ticket NFT in the Event contract if the number of tickets already minted is less than the total available tickets specified by the event owner. However, if the tickets are already sold out (ticketsMinted === totalTickets), the buyer will acquire the first ticket NFT from the resell queue (an on-chain array, following the FIFO queue principle). This, of course, is only possible if a seller is available in the resell queue.
+## How it works
 
-A user can also resell their ticket. If all tickets have been sold and the seller has reached the first index of the FIFO resell queue, their ticket will be sold. From the ticket price, the on-chain specified royalty fee percentage will be returned to the event creator.
+The project addresses the issue of event owners not benefiting from resales of their tickets on the secondary market.
 
-With event tickets represented as NFTs, the buying and reselling process becomes more transparent, ensuring that the event owner receives a royalty for every resold ticket.
+An event creator can create an event, which deploys an `Event.sol` contract on-chain. The owner specifies the number of available tickets, the price per ticket and the royalty percentage they receive for each ticket sold on the secondary market.
+
+A user can buy a ticket, which mints a ticket NFT if fewer tickets than the total have been minted. Once the event is sold out, a buyer gets the first ticket from the resale queue (an on-chain FIFO array), as long as a seller is waiting there.
+
+A user can also resell their ticket. When it reaches the front of the queue and is bought, the royalty share of the price goes to the event creator automatically.
+
+## Screenshots
 
 ### Events available
 
 ![Landing Page](./images/landing-page.png)
 ![Landing Page after connecting](./images/landing-page-wallet-connected.png)
-After connecting to a wallet, you will be greeted by all available events. You can see events you created, events you are attending (events where you bought a ticket NFT), and all other events.
+After connecting a wallet, you see all events: the ones you created, the ones you attend (you own a ticket NFT) and all others.
 
-### Create your event on-chain!
+### Create your event on-chain
 
 ![Create Event](./images/create-event.png)
-Create your event, specify a price, available tickets and your royalty fee in case of a resell. Deploy the Event contract on-chain!
+Set a price, the number of tickets and your royalty for resales, then deploy the Event contract.
 
 ### Buy a ticket NFT
 
@@ -36,7 +46,27 @@ Create your event, specify a price, available tickets and your royalty fee in ca
 ### Resell your ticket
 
 ![Resell Ticket](./images/after-buying-ticket.png)
-Resell your ticket
-
 ![Resell Ticket Queue](./images/reselling-ticket.png)
-After you clicked, the ticket will be put in the market for resale. Once it reached the first index of the FIFO resell queue, the next buyer will buy the ticket from you! The event creator will get his share. Fair, isn't it?
+Your ticket goes into the resale queue. Once it is first in line, the next buyer buys it from you and the event creator receives their share.
+
+## Project structure
+
+```
+frontend/packages/hardhat   Solidity contracts (Event.sol) and deployment scripts
+frontend/packages/nextjs    Next.js dApp (Scaffold-ETH 2)
+backend/resell-dapp-api     NestJS REST API with MongoDB
+```
+
+## Run locally
+
+```bash
+# frontend (from frontend/)
+yarn install
+cp packages/nextjs/.env.example packages/nextjs/.env.local
+yarn start
+
+# backend (from backend/resell-dapp-api/)
+npm install
+cp .env.example .env   # add your own MongoDB connection string
+npm run start:dev
+```
